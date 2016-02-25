@@ -21,7 +21,8 @@ var fs = require('fs');
 var codes = fs.readFileSync('koder.txt').toString().split("\n");
 var hostname = 'www.madkonkurrence.dk';
 var count = 0;
-var wins = 0;
+var firstPriceWins = 0;
+var secondPriceWins = 0;
 var submittedWins = 0;
 var timeToWait = 0;
 var failedCodes = [];
@@ -101,9 +102,14 @@ function checkCode(code) {
             }
             console.log(count + ': ' + code + ': ' + parsedData.Status);
             if (parsedData.Status === 'WonFirstPrice' || parsedData.Status === 'WonSecondPrice') {
-                console.log('Du har vundet: ' + parsedData.Price + ' Vinder ID: ' + parsedData.WinnerId);
-                wins++;
-                submitWinnerInfo(parsedData.WinnerId);
+                console.log('Du har vundet. ' + 'Vinder ID: ' + parsedData.WinnerId);
+                console.log(parsedData.Price);
+                if (parsedData.Status === 'WonFirstPrice') {
+                    submitWinnerInfo(parsedData.WinnerId);
+                    firstPriceWins++;
+                } else {
+                    secondPriceWins++;
+                }
             }
 
         });
@@ -147,16 +153,15 @@ function submitWinnerInfo(winnerId) {
         });
         res.on('end', function() {
             console.log('Vinderinfo sendt.');
-            submittedWins++;
         });
-
-        req.on('error', function(err) {
-            console.log('ERROR:');
-            console.log(err);
-        });
-        req.write(reqData);
-        req.end();
     });
+
+    req.on('error', function(err) {
+        console.log('ERROR:');
+        console.log(err);
+    });
+    req.write(reqData);
+    req.end();
 }
 
 function end() {
@@ -167,7 +172,7 @@ function end() {
             _timeToWait += getRandomInt(minWait, maxWait);
             setTimeout(checkCode, _timeToWait, failedCodes.pop());
         }
-    } else if (count === codes.length && wins === submittedWins) {
+    } else if (count === codes.length && firstPriceWins === submittedWins) {
 
         var data = [];
         var reqData = JSON.stringify({
@@ -201,8 +206,8 @@ function end() {
         req.write(reqData);
         req.end();
 
-        console.log(count + ' koder sendt.');
-        console.log(wins + ' wins.');
+        console.log('Submitted ' + count + ' codes.');
+        console.log(firstPriceWins + secondPriceWins + ' wins.');
     }
 }
 
