@@ -36,7 +36,7 @@ function start() {
         setTimeout(checkCode, timeToWait, codes[i]);
         timeToWait += getRandomInt(minWait, maxWait);
     }
-    setInterval(end, 2000);
+    setTimeout(end, timeToWait + 1500);
 }
 
 function getGlobalSecurity(callback) {
@@ -152,6 +152,7 @@ function submitWinnerInfo(winnerId) {
 
         });
         res.on('end', function() {
+            submittedWins++;
             console.log('Vinderinfo sendt.');
         });
     });
@@ -208,6 +209,8 @@ function end() {
 
         console.log('Submitted ' + count + ' codes.');
         console.log(firstPriceWins + secondPriceWins + ' wins.');
+    } else {
+        setInterval(end, 1000);
     }
 }
 
